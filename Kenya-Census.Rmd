@@ -1,0 +1,41 @@
+---
+title: "Kenya-Census"
+author: "David Jackson"
+date: "1/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(scales)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(tidytuesdayR)
+```
+
+## TidyTuesday Weekly Challenge: Kenya Census
+
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2021-01-19')
+households <- tuesdata$households
+crops <- tuesdata$crops
+gender <- tuesdata$gender
+```
+
+```{r}
+gender_total <- gender %>% filter(County == "Total")
+gender_total$PerMale <- gender_total$Male/gender_total$Total
+gender_total$PerFemale <- gender_total$Female/gender_total$Total
+gender_total$EstMale <- gender_total$Male + gender_total$Intersex * .495
+gender_total$EstFemale <- gender_total$Female + gender_total$Intersex * .504
+```
+```{r}
+pivot_totals <- pivot_longer(gender_total,col = Male:EstFemale) %>%
+  filter(name != "Intersex", name != "Total",name != "PerFemale" , name !="PerMale")
+ 
+ggplot(pivot_totals) + geom_col(aes(x=name,y=value)) +
+  scale_y_continuous(labels = comma)
+```
+
